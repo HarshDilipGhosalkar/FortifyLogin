@@ -2,10 +2,14 @@ import express from "express";
 import cors from "cors";
 import morgan from "morgan";
 import { db } from "./Database/db.js";
+import router from "./Router/route.js";
 
 
 const app=express();
 
+// api routes
+
+app.use("/api",router);
 
 app.use(express.json());
 app.use(cors());
