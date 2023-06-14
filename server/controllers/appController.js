@@ -44,7 +44,6 @@ export async function register(req, res) {
     }
 }
 
-
 /** POST: http://localhost:8080/api/login 
  * @param: {
   "username" : "example123",
@@ -84,11 +83,12 @@ export async function getUser(req, res) {
     const { username } = req.params;
     console.log(username);
     try {
-        if (!username) return res.status(501).send({ error: "Invalidusername" })
+        if (!username) return res.status(501).send({ error: "Invalid username" })
         const q = "SELECT * FROM user WHERE username=?";
-        pool.query(q, [username], (err, data) => {
+        db.query(q, [username], (err, data) => {
             if (err) return res.status(404).send({ error: "User not found" });
-            return res.send(data[0]);
+            const { password, ...rest } = data[0];
+            return res.send({ rest });
         })
     } catch (error) {
         return res.status(400).send({ error: "cannot find user data" });
@@ -107,5 +107,16 @@ body: {
 }
 */
 export async function updateUser(req, res) {
-
+    const id = req.query.id;
+    if (id) {
+        const body = req.body;
+        console.log(body);
+        const q = "UPDATE user SET ? WHERE iduser=?";
+        db.query(q, [body, id], (err, data) => {
+            if (err) return res.send({ error: err });
+            return res.status(200).send({ msg: "Data updated successfully" });
+        })
+    } else {
+        return res.status(401).send({ error: "id not found" });
+    }
 }
