@@ -55,27 +55,27 @@ export async function login(req, res) {
     const { username, password } = req.body;
     try {
         const q = "SELECT * FROM user WHERE username=?";
-        db.query(q, [username],(err,data)=>{
+        db.query(q, [username], (err, data) => {
             console.log(data[0].password);
-            if(err) return res.status(400).send({error:"user not found"});
-                  bcrypt.compare(password, data[0].password)
-                    .then(passwordCheck => {
-                        if (!passwordCheck) return res.status(400).send({ error: "Dont have password" });
-                        const id = data[0].iduser;
+            if (err) return res.status(400).send({ error: "user not found" });
+            bcrypt.compare(password, data[0].password)
+                .then(passwordCheck => {
+                    if (!passwordCheck) return res.status(400).send({ error: "Dont have password" });
+                    const id = data[0].iduser;
 
-                        const token = jwt.sign({ id, username }, process.env.JWT_SECRET, { expiresIn: "24h" });
-                        return res.status(200).send({
-                            msg: "Login successfull",
-                            username: username,
-                            token
-                        })
+                    const token = jwt.sign({ id, username }, process.env.JWT_SECRET, { expiresIn: "24h" });
+                    return res.status(200).send({
+                        msg: "Login successfull",
+                        username: username,
+                        token
                     })
-                    .catch(error => {
-                        return res.status(400).send({ error: "Password does not match" });
-                    })
+                })
+                .catch(error => {
+                    return res.status(400).send({ error: "Password does not match" });
+                })
         })
     } catch (error) {
-        return res.status(500).send({error})
+        return res.status(500).send({ error })
     }
 }
 
@@ -86,15 +86,10 @@ export async function getUser(req, res) {
     try {
         if (!username) return res.status(501).send({ error: "Invalidusername" })
         const q = "SELECT * FROM user WHERE username=?";
-        pool.query(q, [username])
-            .then(result => {
-
-                return res.send(result[0]);
-
-            })
-            .catch(error => {
-                return res.status(400).send({ error: "user not found..." });
-            })
+        pool.query(q, [username], (err, data) => {
+            if (err) return res.status(404).send({ error: "User not found" });
+            return res.send(data[0]);
+        })
     } catch (error) {
         return res.status(400).send({ error: "cannot find user data" });
     }
