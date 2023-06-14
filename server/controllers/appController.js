@@ -5,7 +5,24 @@ import dotenv from "dotenv";
 dotenv.config();
 
 
+/** middleware for verify Id */
+export async function verifyId(req, res, next){
+    try {
+        
+        const id = req.query.id;
 
+        const q="SELECT * FROM user WHERE iduser=?";
+        db.query(q,[id],(err,data)=>{
+            if(err) return res.send({error:err});
+            if(data.length===0) return res.status(404).send({msg:"Id not found"});
+            next();
+        })
+        
+
+    } catch (error) {
+        return res.status(404).send({ error: "Authentication Error"});
+    }
+}
 
 /** POST: http://localhost:8080/api/register 
  * @param : {
@@ -113,7 +130,7 @@ export async function updateUser(req, res) {
         console.log(body);
         const q = "UPDATE user SET ? WHERE iduser=?";
         db.query(q, [body, id], (err, data) => {
-            if (err) return res.send({ error: err });
+            if (err) return res.send({ error: "Id not found" });
             return res.status(200).send({ msg: "Data updated successfully" });
         })
     } else {
