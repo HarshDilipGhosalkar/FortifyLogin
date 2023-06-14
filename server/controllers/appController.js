@@ -1,4 +1,4 @@
-import pool from "../Database/db.js";
+import db from "../Database/db.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
@@ -24,23 +24,23 @@ export async function register(req, res) {
     const { password, username, email } = req.body;
     try {
 
-        const result = await pool.query(q, [email, username]);
-
-        if (result[0].length) return res.json("user already existed");
-
-        try {
+        db.query(q, [email, username],(err,result)=>{
+            console.log(result);
+         if(result.length !==0) return res.send({msg:"User ALready exists...!"});
+         try {
 
             bcrypt.hash(password, 10)
                 .then(hashedPassword => {
                     const q = "INSERT INTO user (`username`, `password`, `email`) VALUES (?,?,?)"
-                    pool.query(q, [username, hashedPassword, email]);
+                    db.query(q, [username, hashedPassword, email]);
                     return res.status(200).json("user successfully created");
                 })
         } catch (error) {
-            return res.json(error);
+            return res.send({error});
         }
+        });
     } catch (error) {
-        return res.json(error);
+        return res.send({error});
     }
 }
 
@@ -83,7 +83,23 @@ export async function login(req, res) {
 
 /** GET: http://localhost:8080/api/user/example123 */
 export async function getUser(req, res) {
-
+    const {username}=req.params;
+    console.log(username);
+    try {
+        if(!username) return res.status(501).send({error:"Invalidusername"})
+        const q="SELECT * FROM user WHERE username=?";
+        pool.query(q,[username])
+        .then(result=>{
+           
+           return res.send(result[0]);
+        
+        })
+        .catch(error=>{
+           return res.status(400).send({error:"user not found..."});
+        })
+    } catch (error) {
+        return res.status(400).send({error:"cannot find user data"});
+    }
 }
 
 

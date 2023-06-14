@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
 import router from './Router/route.js';
+import db from './Database/db.js';
 
 const app = express();
 
@@ -20,8 +21,16 @@ const port= 8080;
 app.get("/",(req,res)=>{
     res.status(201).json("Home get request");
 })
+db.connect(function(err) {
+    if (err) {
+      console.error('error connecting: ' + err.stack);
+      return;
+    }
+   
+    app.listen(port,()=>{
+        console.log("Connected to database");
+        console.log('server started at port'+port);
+    }) 
+  });
 
-app.listen(port,()=>{
-    console.log('server started at port'+port);
-}) 
      
