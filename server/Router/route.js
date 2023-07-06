@@ -1,23 +1,28 @@
 import { Router } from "express";
-import * as controller from "../controllers/appController.js";
-const router=Router();
+const router = Router();
+
+/** import all controllers */
+import * as controller from '../controllers/appController.js';
+import Auth, { localVariables } from '../middleware/auth.js';
 
 
-// post methods
-router.route("/register").post(controller.register);
-router.route("/registerMail").post();
-router.route("/authenticate").post();
-router.route("/login").post(controller.login);
+
+/** POST Methods */
+router.route('/register').post(controller.register); // register user
+router.route('/authenticate').post(controller.verifyUser, (req, res) => res.end()); // authenticate user
+router.route('/login').post(controller.verifyUser,controller.login); // login in app
+
+/** GET Methods */
+router.route('/user/:username').get(controller.getUser) // user with username
+router.route('/generateOTP').get(controller.verifyUser, localVariables, controller.generateOTP) // generate random OTP
+router.route('/verifyOTP').get(controller.verifyUser, controller.verifyOTP) // verify generated OTP
+router.route('/createResetSession').get(controller.createResetSession) // reset all the variables
 
 
-// get methods
-router.route("/user/:username").get(controller.getUser);
-router.route("/ganerateOTP").get();
-router.route("/verifyOTP").get();
-router.route("/createResetSession").get();
+/** PUT Methods */
+router.route('/updateuser').put(Auth, controller.updateUser); // is use to update the user profile
+router.route('/resetPassword').put(controller.verifyUser); // use to reset password
 
-// put methods
-router.route("/updateuser").put(controller.verifyId,controller.updateUser);
-router.route("/resetPassword").put();
+
 
 export default router;
