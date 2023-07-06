@@ -5,22 +5,41 @@ import dotenv from "dotenv";
 dotenv.config();
 
 
-/** middleware for verify Id */
-export async function verifyId(req, res, next){
+
+/** middleware for verify user */
+export async function verifyUser(req, res, next){
     try {
         
-        const id = req.query.id;
+        const { username } = req.method == "GET" ? req.query : req.body;
 
-        const q="SELECT * FROM user WHERE iduser=?";
-        db.query(q,[id],(err,data)=>{
-            if(err) return res.send({error:err});
-            if(data.length===0) return res.status(404).send({msg:"Id not found"});
+        // check the user existance
+        const q = "SELECT * FROM user WHERE username=?";
+        db.query(q, [username], (err, data) => {
+            if (err) return res.status(400).send({ error: "user not found" });
             next();
         })
         
 
     } catch (error) {
         return res.status(404).send({ error: "Authentication Error"});
+    }
+}
+
+/** middleware for verify Id */
+export async function verifyId(req, res, next) {
+    try {
+
+        const id = req.query.id;
+
+        const q = "SELECT * FROM user WHERE iduser=?";
+        db.query(q, [id], (err, data) => {
+            if (err) return res.send({ error: err });
+            if (data.length === 0) return res.status(404).send({ msg: "Id not found" });
+            next();
+        })
+
+    } catch (error) {
+        return res.status(404).send({ error: "Authentication Error" });
     }
 }
 
@@ -37,27 +56,43 @@ export async function verifyId(req, res, next){
 }
 */
 export async function register(req, res) {
-    const q = "SELECT * FROM user WHERE email= ? OR username =?";
-    const { password, username, email } = req.body;
+
+
     try {
+        const { username, password, email } = req.body;
+        const q = "SELECT * FROM user WHERE email= ? OR username =?";
+        // check the existing user
+        const useroremailexists = new Promise((resolve, reject) => {
+            db.query(q, [email, username], (err, result) => {
+                if (err) reject(new Error(err))
+                if(result.length!==0) reject({ error: "Please use unique Email and Userame" });
+                
 
-        db.query(q, [email, username], (err, result) => {
-            console.log(result);
-            if (result.length !== 0) return res.send({ msg: "User ALready exists...!" });
-            try {
-
-                bcrypt.hash(password, 10)
-                    .then(hashedPassword => {
-                        const q = "INSERT INTO user (`username`, `password`, `email`) VALUES (?,?,?)"
-                        db.query(q, [username, hashedPassword, email]);
-                        return res.status(200).json("user successfully created");
-                    })
-            } catch (error) {
-                return res.send({ error });
-            }
+                resolve();
+            });
         });
+
+        useroremailexists
+            .then(() => {
+               
+                    console.log("creating");
+                    bcrypt.hash(password, 10)
+                        .then(hashedPassword => {
+                            const q = "INSERT INTO user (`username`, `password`, `email`) VALUES (?,?,?)"
+                            db.query(q, [username, hashedPassword, email]);
+                            return res.status(201).send({ msg: "User successfully created!" });
+                        }).catch(error => {
+                            return res.status(500).send({error:"unable to hash password"})
+                        })
+              
+             
+
+            }).catch(error => {
+                return res.status(500).send({ error })
+            })
+
     } catch (error) {
-        return res.send({ error });
+        return res.status(500).send(error)
     }
 }
 
@@ -124,7 +159,8 @@ body: {
 }
 */
 export async function updateUser(req, res) {
-    const id = req.query.id;
+    // const id = req.query.id;
+    const { id } = req.user;
     if (id) {
         const body = req.body;
         console.log(body);
@@ -136,4 +172,32 @@ export async function updateUser(req, res) {
     } else {
         return res.status(401).send({ error: "id not found" });
     }
+}
+
+/** GET: http://localhost:8080/api/generateOTP */
+export async function generateOTP(req,res){
+    req.app.locals.OTP = await otpGenerator.generate(6, { lowerCaseAlphabets: false, upperCaseAlphabets: false, specialChars: false})
+    res.status(201).send({ code: req.app.locals.OTP })
+}
+
+
+/** GET: http://localhost:8080/api/verifyOTP */
+export async function verifyOTP(req,res){
+    const { code } = req.query;
+    if(parseInt(req.app.locals.OTP) === parseInt(code)){
+        req.app.locals.OTP = null; // reset the OTP value
+        req.app.locals.resetSession = true; // start session for reset password
+        return res.status(201).send({ msg: 'Verify Successsfully!'})
+    }
+    return res.status(400).send({ error: "Invalid OTP"});
+}
+
+
+// successfully redirect user when OTP is valid
+/** GET: http://localhost:8080/api/createResetSession */
+export async function createResetSession(req,res){
+   if(req.app.locals.resetSession){
+        return res.status(201).send({ flag : req.app.locals.resetSession})
+   }
+   return res.status(440).send({error : "Session expired!"})
 }
