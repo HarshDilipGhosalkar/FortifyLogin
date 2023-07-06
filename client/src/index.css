@@ -1,0 +1,40 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* > *{
+    font-family: 'Poppins', sans-serif;
+}
+
+body{
+    background: #dcdce6;
+    /* background-image: url('./assets/Background.png'); */
+    padding: 0;
+    margin: 0;
+}
+section{
+    background-image: -webkit-linear-gradient(65deg, #cef5bd 50%, #ffffff 50%);
+}
+.inner-div{
+    background-color: rgba(255,255,255,0.4);
+    backdrop-filter: blur(8px);
+}
+.img-div{
+    transition: 0.8s ease-in-out; 
+}
+
+.form-wrap{
+    transition: 0.8s ease-in-out;
+}
+.login-form-mode .form-wrap{
+position: relative;
+top: 0;
+left: 50%;
+}
+.login-form-mode .img-div{
+    position: relative;
+    top: 0;
+    right: 50%;
+    }
