@@ -2,26 +2,28 @@ import db from "../Database/db.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
+import { query } from "express";
 dotenv.config();
 
 
 
 /** middleware for verify user */
-export async function verifyUser(req, res, next){
+export async function verifyUser(req, res, next) {
     try {
-        
+
         const { username } = req.method == "GET" ? req.query : req.body;
 
         // check the user existance
         const q = "SELECT * FROM user WHERE username=?";
         db.query(q, [username], (err, data) => {
             if (err) return res.status(400).send({ error: "user not found" });
+            if (data.length === 0) return res.status(404).send({ error: "user not found" });
             next();
         })
-        
+
 
     } catch (error) {
-        return res.status(404).send({ error: "Authentication Error"});
+        return res.status(404).send({ error: "Authentication Error" });
     }
 }
 
@@ -65,8 +67,8 @@ export async function register(req, res) {
         const useroremailexists = new Promise((resolve, reject) => {
             db.query(q, [email, username], (err, result) => {
                 if (err) reject(new Error(err))
-                if(result.length!==0) reject({ error: "Please use unique Email and Userame" });
-                
+                if (result.length !== 0) reject({ error: "Please use unique Email and Userame" });
+
 
                 resolve();
             });
@@ -74,18 +76,18 @@ export async function register(req, res) {
 
         useroremailexists
             .then(() => {
-               
-                    console.log("creating");
-                    bcrypt.hash(password, 10)
-                        .then(hashedPassword => {
-                            const q = "INSERT INTO user (`username`, `password`, `email`) VALUES (?,?,?)"
-                            db.query(q, [username, hashedPassword, email]);
-                            return res.status(201).send({ msg: "User successfully created!" });
-                        }).catch(error => {
-                            return res.status(500).send({error:"unable to hash password"})
-                        })
-              
-             
+
+                console.log("creating");
+                bcrypt.hash(password, 10)
+                    .then(hashedPassword => {
+                        const q = "INSERT INTO user (`username`, `password`, `email`) VALUES (?,?,?)"
+                        db.query(q, [username, hashedPassword, email]);
+                        return res.status(201).send({ msg: "User successfully created!" });
+                    }).catch(error => {
+                        return res.status(500).send({ error: "unable to hash password" })
+                    })
+
+
 
             }).catch(error => {
                 return res.status(500).send({ error })
@@ -175,29 +177,62 @@ export async function updateUser(req, res) {
 }
 
 /** GET: http://localhost:8080/api/generateOTP */
-export async function generateOTP(req,res){
-    req.app.locals.OTP = await otpGenerator.generate(6, { lowerCaseAlphabets: false, upperCaseAlphabets: false, specialChars: false})
+export async function generateOTP(req, res) {
+    req.app.locals.OTP = await otpGenerator.generate(6, { lowerCaseAlphabets: false, upperCaseAlphabets: false, specialChars: false })
     res.status(201).send({ code: req.app.locals.OTP })
 }
 
 
 /** GET: http://localhost:8080/api/verifyOTP */
-export async function verifyOTP(req,res){
+export async function verifyOTP(req, res) {
     const { code } = req.query;
-    if(parseInt(req.app.locals.OTP) === parseInt(code)){
+    if (parseInt(req.app.locals.OTP) === parseInt(code)) {
         req.app.locals.OTP = null; // reset the OTP value
         req.app.locals.resetSession = true; // start session for reset password
-        return res.status(201).send({ msg: 'Verify Successsfully!'})
+        return res.status(201).send({ msg: 'Verify Successsfully!' })
     }
-    return res.status(400).send({ error: "Invalid OTP"});
+    return res.status(400).send({ error: "Invalid OTP" });
 }
 
 
 // successfully redirect user when OTP is valid
 /** GET: http://localhost:8080/api/createResetSession */
-export async function createResetSession(req,res){
-   if(req.app.locals.resetSession){
-        return res.status(201).send({ flag : req.app.locals.resetSession})
-   }
-   return res.status(440).send({error : "Session expired!"})
+export async function createResetSession(req, res) {
+    if (req.app.locals.resetSession) {
+        return res.status(201).send({ flag: req.app.locals.resetSession })
+    }
+    return res.status(440).send({ error: "Session expired!" })
+}
+
+// update the password when we have valid session
+/** PUT: http://localhost:8080/api/resetPassword */
+export async function resetPassword(req, res) {
+    try {
+
+        if (!req.app.locals.resetSession) return res.status(440).send({ error: "Session expired!" });
+
+        const { username, password } = req.body;
+
+        try {
+            bcrypt.hash(password, 10)
+                .then(hashedPassword => {
+                    const q = "UPDATE user SET password=? WHERE username=?";
+                    db.query(q, [hashedPassword, username], (err, data) => {
+                        if (err) return res.status(500).send({ error: "could not reset password" })
+                        req.app.locals.resetSession = false; // reset session
+                        return res.status(201).send({ msg: "Record Updated...!" })
+                    })
+                })
+                .catch(e => {
+                    return res.status(500).send({
+                        error: "Enable to hashed password"
+                    })
+                })
+        } catch (error) {
+            return res.status(500).send({ error })
+        }
+
+    } catch (error) {
+        return res.status(401).send({ error })
+    }
 }
