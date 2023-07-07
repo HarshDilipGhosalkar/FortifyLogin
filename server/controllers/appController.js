@@ -11,13 +11,13 @@ dotenv.config();
 export async function verifyUser(req, res, next) {
     try {
 
-        const { username } = req.method == "GET" ? req.query : req.body;
+        const { email } = req.method == "GET" ? req.query : req.body;
 
         // check the user existance
-        const q = "SELECT * FROM user WHERE username=?";
-        db.query(q, [username], (err, data) => {
+        const q = "SELECT * FROM user WHERE email=?";
+        db.query(q, [email], (err, data) => {
             if (err) return res.status(400).send({ error: "user not found" });
-            if (data.length === 0) return res.status(404).send({ error: "user not found" });
+            if (data.length === 0) return res.status(404).send({ error: "userss not found" });
             next();
         })
 
@@ -105,21 +105,22 @@ export async function register(req, res) {
 }
 */
 export async function login(req, res) {
-    const { username, password } = req.body;
+    const { email, password } = req.body;
     try {
-        const q = "SELECT * FROM user WHERE username=?";
-        db.query(q, [username], (err, data) => {
-            console.log(data[0].password);
+        const q = "SELECT * FROM user WHERE email=?";
+        db.query(q, [email], (err, data) => {
+            
             if (err) return res.status(400).send({ error: "user not found" });
+            console.log("password",data[0].password,password);
             bcrypt.compare(password, data[0].password)
                 .then(passwordCheck => {
                     if (!passwordCheck) return res.status(400).send({ error: "Dont have password" });
                     const id = data[0].iduser;
 
-                    const token = jwt.sign({ id, username }, process.env.JWT_SECRET, { expiresIn: "24h" });
+                    const token = jwt.sign({ id, email }, process.env.JWT_SECRET, { expiresIn: "24h" });
                     return res.status(200).send({
                         msg: "Login successfull",
-                        username: username,
+                        email: email,
                         token
                     })
                 })
