@@ -19,3 +19,16 @@ export async function registerUser(credentials){
         return Promise.reject({ error })
     }
 }
+
+/** login function */
+export async function login({ email, password }){
+    try {
+        if(email){
+            const { data } = await axios.post('/api/login', { email, password })
+            console.log(data);
+            return Promise.resolve({ data });
+        }
+    } catch (error) {
+        return Promise.reject({ error : "Password doesn't Match...!"})
+    }
+}

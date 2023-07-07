@@ -1,20 +1,31 @@
 import React, { useState } from 'react'
+import toast, { Toaster } from 'react-hot-toast';
 import { Link, useNavigate } from 'react-router-dom'
 import { useFormik } from 'formik';
-import { registerValidation } from '../helper/validate';
+import { loginValidation} from '../helper/validate';
+import { login } from '../helper/helper';
 
 export default function Login() {
-
+const navigate =useNavigate();
   const formik = useFormik({
     initialValues: {
       email: 'doyol56239@cnogs.com',
       password: 'admin@123'
     },
-    validate: registerValidation,
+    validate: loginValidation,
     validateOnBlur: false,
     validateOnChange: false,
     onSubmit: async values => {
-      console.log(values);
+      let loginPromise = login(values)
+      toast.promise(loginPromise, {
+        loading: 'Logging...',
+        success: <b>Login Successfully...!</b>,
+        error: <b>Invalid credentials</b>
+      });
+      console.log("this promise",loginPromise);
+      loginPromise
+      .then(function () { navigate('/success') })
+      .catch(()=> navigate('/'));
     }
   })
 
