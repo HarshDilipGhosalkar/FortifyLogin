@@ -4,14 +4,14 @@ import { profileValidation } from "../helper/validate";
 import { authenticate } from "../helper/helper";
 import toast, { Toaster } from 'react-hot-toast';
 import { useNavigate } from "react-router-dom";
-
+import { generateOTP } from "../helper/helper";
 
 export default function ForgotPassword({ onclose, visible }) {
-    const navigate=useNavigate();
+    const navigate = useNavigate();
     const handleonClose = (e) => {
         if (e.target.id == "container") onclose();
     }
-    
+
     const formik = useFormik({
         initialValues: {
             email: '',
@@ -20,25 +20,36 @@ export default function ForgotPassword({ onclose, visible }) {
         validateOnBlur: false,
         validateOnChange: false,
         onSubmit: async values => {
+            console.log(values.email);
             let authPromise = authenticate(values.email)
             toast.promise(authPromise, {
-              loading: 'Logging...',
-              success: <b>User Found!</b>,
-              error: <b>Invalid email</b>
+                loading: 'Logging...',
+                success: <b>User Found!</b>,
+                error: <b>Invalid email</b>
             });
-      
+
             authPromise.then(res => {
-              onclose();
-              navigate('/') 
+              generateOTP(values.email)
+                   .then(res => {  
+                        console.log(res)     
+                // onclose();
+                // navigate('/')
+                        
+                                           
+                    })
+                    .catch(error => {
+                        console.log(error)
+                    });
+               
             })
-            .catch(()=> navigate('/'));
-          }
+            .catch(() => navigate('/'));
+        }
     })
 
     if (!visible) return null;
     return (
         <div onClick={handleonClose} id="container" className=" inset-0 fixed bg-black bg-opacity-50 backdrop-blur-md flex justify-center items-center">
-                  <Toaster position='top-center' reverseOrder={false}></Toaster>
+            <Toaster position='top-center' reverseOrder={false}></Toaster>
 
             <div className="bg-white flex flex-col rounded-2xl shadow-lg p-10 sm:max-w-3xl max-w-[90%]">
                 <h1 className="font-bold text-2xl text-[#376549]">Forgot Password?</h1>

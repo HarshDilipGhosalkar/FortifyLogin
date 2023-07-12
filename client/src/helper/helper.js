@@ -9,7 +9,7 @@ axios.defaults.baseURL = process.env.REACT_APP_SERVER_DOMAIN;
 /** authenticate function */
 export async function authenticate(email){
     try {
-       const data = await axios.post('/api/authenticate', { email })
+       await axios.post('/api/authenticate', {email})
        return Promise.resolve();
     } catch (error) {
        return Promise.reject({ error })
@@ -70,7 +70,7 @@ export async function updateUser(response){
 /** generate OTP */
 export async function generateOTP(email){
     try {
-        const {data : { code }, status } = await axios.get('/api/generateOTP', { params : { email }});
+        const {data:{code}} = await axios.get('/api/generateOTP', { params : { email }});
 
         // send mail with the OTP
         // if(status === 201){

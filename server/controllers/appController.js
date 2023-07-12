@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import { query } from "express";
+import otpGenerator from 'otp-generator';
 dotenv.config();
 
 
@@ -12,7 +13,7 @@ export async function verifyUser(req, res, next) {
     try {
 
         const { email } = req.method == "GET" ? req.query : req.body;
-
+        console.log(email);
         // check the user existance
         const q = "SELECT * FROM user WHERE email=?";
         db.query(q, [email], (err, data) => {
@@ -180,6 +181,7 @@ export async function updateUser(req, res) {
 /** GET: http://localhost:8080/api/generateOTP */
 export async function generateOTP(req, res) {
     req.app.locals.OTP = await otpGenerator.generate(6, { lowerCaseAlphabets: false, upperCaseAlphabets: false, specialChars: false })
+    console.log(req.app.locals.OTP);
     res.status(201).send({ code: req.app.locals.OTP })
 }
 
