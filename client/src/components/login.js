@@ -4,9 +4,15 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useFormik } from 'formik';
 import { loginValidation} from '../helper/validate';
 import { login } from '../helper/helper';
+import { useAuthStore } from '../store/store'
+
 
 export default function Login() {
+
+const setEmail = useAuthStore(state => state.setEmail);
+
 const navigate =useNavigate();
+
   const formik = useFormik({
     initialValues: {
       email: 'doyol56239@cnogs.com',
@@ -23,8 +29,14 @@ const navigate =useNavigate();
         error: <b>Invalid credentials</b>
       });
       console.log("this promise",loginPromise);
-      loginPromise
-      .then(function () { navigate('/success') })
+
+      loginPromise.then(res => {
+        let { token } = res.data;
+        console.log(token)
+        localStorage.setItem('token', token);
+        setEmail(values.email);
+        navigate('/profile') 
+      })
       .catch(()=> navigate('/'));
     }
   })
