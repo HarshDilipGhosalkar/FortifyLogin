@@ -135,15 +135,15 @@ export async function login(req, res) {
 
 /** GET: http://localhost:8080/api/user/example123 */
 export async function getUser(req, res) {
-    const { username } = req.params;
-    console.log(username);
+    const { email } = req.params;
+    console.log(email);
     try {
-        if (!username) return res.status(501).send({ error: "Invalid username" })
-        const q = "SELECT * FROM user WHERE username=?";
-        db.query(q, [username], (err, data) => {
+        if (!email) return res.status(501).send({ error: "Invalid username" })
+        const q = "SELECT * FROM user WHERE email=?";
+        db.query(q, [email], (err, data) => {
             if (err) return res.status(404).send({ error: "User not found" });
             const { password, ...rest } = data[0];
-            return res.send({ rest });
+            return res.status(201).send(rest);
         })
     } catch (error) {
         return res.status(400).send({ error: "cannot find user data" });
