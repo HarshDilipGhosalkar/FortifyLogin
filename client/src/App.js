@@ -1,8 +1,8 @@
 import React from 'react'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import Register from './components/register';
-import Success from './components/success';
-
+import Profile from './components/profile';
+import { AuthorizeUser } from './middleware/auth';
 /** root routes */
 const router = createBrowserRouter([
   {
@@ -10,8 +10,8 @@ const router = createBrowserRouter([
     element : <Register />,
 },
 {
-  path : '/success',
-  element : <Success />
+  path : '/profile',
+  element :<AuthorizeUser> <Profile /> </AuthorizeUser>
 },
     
     
