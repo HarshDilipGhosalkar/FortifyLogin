@@ -9,9 +9,10 @@ axios.defaults.baseURL = process.env.REACT_APP_SERVER_DOMAIN;
 /** authenticate function */
 export async function authenticate(email){
     try {
-        return await axios.post('/api/authenticate', { email })
+       const data = await axios.post('/api/authenticate', { email })
+       return Promise.resolve();
     } catch (error) {
-        return { error : "Username doesn't exist...!"}
+       return Promise.reject({ error })
     }
 }
 
@@ -28,7 +29,7 @@ export async function registerUser(credentials){
     try {
         const { data : { msg }, status } = await axios.post(`/api/register`, credentials);
 
-      
+        
         console.log("status",status);
         
         
