@@ -5,12 +5,24 @@ import wheat from '../assets/farm.jpg';
 import Login from './login';
 import Register1 from './register1';
 import ForgotPassword from './forgotPassword';
+import OTPVerification from './OTPVerification';
 
 export default function Register() {
 
 
-  const [visible, setvisibility] = useState(false);
-  const handleonClose = () => setvisibility(false);
+  const [ForfotFormVisible, setvisibility1] = useState(false);
+  const handleonClose = () => setvisibility1(false);
+  
+  const [OTPFormVisible, setotp] = useState(false);
+  const closeOtpForm = () => {
+    setotp(false);
+    
+  }
+  const openOtpForm = () => {
+    setotp(true);
+    
+  }
+
   function hideLogin() {
     console.log("yes");
     document.querySelector("main").classList.toggle("login-form-mode");
@@ -26,7 +38,7 @@ export default function Register() {
 
         <div className="login-section sm:w-1/2 px-10 form-wrap ease-in-out duration-[0.8s]">
           <Login />
-          <p onClick={() => setvisibility(true)} className=' cursor-pointer text-[12px] text-[#376549]'>Forgot your password?</p>
+          <p onClick={() => setvisibility1(true)} className=' cursor-pointer text-[12px] text-[#376549]'>Forgot your password?</p>
           <hr className='border-[#376549] my-[10px]' />
           <div className='flex items-center'>
             <p className='text-[12px] text-[#376549]'>Dont have Account?</p>
@@ -48,7 +60,8 @@ export default function Register() {
 
       </div>
 
-      <ForgotPassword onclose={handleonClose} visible={visible} />
+      <ForgotPassword onclose={handleonClose} visible={ForfotFormVisible} openOtpForm={openOtpForm}/>
+      <OTPVerification onclose={closeOtpForm} visible={OTPFormVisible} />
     </section>
 
 
