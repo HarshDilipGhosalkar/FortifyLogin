@@ -85,10 +85,11 @@ export async function generateOTP(email){
 }
 
 /** verify OTP */
-export async function verifyOTP({ email, code }){
+export async function verifyOTP( code ){
+    
     try {
-       const { data, status } = await axios.get('/api/verifyOTP', { params : { email, code }})
-       return { data, status }
+       const { data, status } = await axios.get('/api/verifyOTP', { params : { code }})
+       return Promise.resolve({ data, status})
     } catch (error) {
         return Promise.reject(error);
     }
@@ -97,6 +98,7 @@ export async function verifyOTP({ email, code }){
 /** reset password */
 export async function resetPassword({ email, password }){
     try {
+        console.log("reached");
         const { data, status } = await axios.put('/api/resetPassword', { email, password });
         return Promise.resolve({ data, status})
     } catch (error) {
