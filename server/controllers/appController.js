@@ -189,6 +189,7 @@ export async function generateOTP(req, res) {
 /** GET: http://localhost:8080/api/verifyOTP */
 export async function verifyOTP(req, res) {
     const { code } = req.query;
+    console.log(code, req.app.locals.OTP);
     if (parseInt(req.app.locals.OTP) === parseInt(code)) {
         req.app.locals.OTP = null; // reset the OTP value
         req.app.locals.resetSession = true; // start session for reset password
@@ -214,13 +215,13 @@ export async function resetPassword(req, res) {
 
         if (!req.app.locals.resetSession) return res.status(440).send({ error: "Session expired!" });
 
-        const { username, password } = req.body;
+        const { email, password } = req.body;
 
         try {
             bcrypt.hash(password, 10)
                 .then(hashedPassword => {
-                    const q = "UPDATE user SET password=? WHERE username=?";
-                    db.query(q, [hashedPassword, username], (err, data) => {
+                    const q = "UPDATE user SET password=? WHERE email=?";
+                    db.query(q, [hashedPassword, email], (err, data) => {
                         if (err) return res.status(500).send({ error: "could not reset password" })
                         req.app.locals.resetSession = false; // reset session
                         return res.status(201).send({ msg: "Record Updated...!" })
