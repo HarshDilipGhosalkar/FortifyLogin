@@ -5,13 +5,15 @@ import { authenticate } from "../helper/helper";
 import toast, { Toaster } from 'react-hot-toast';
 import { useNavigate } from "react-router-dom";
 import { generateOTP } from "../helper/helper";
+import { useAuthStore } from "../store/store";
 
 export default function ForgotPassword({ onclose, visible, openOtpForm }) {
+    const setEmail = useAuthStore(state => state.setEmail);
     const navigate = useNavigate();
     const handleonClose = (e) => {
         if (e.target.id == "container") onclose();
     }
-   
+
     const formik = useFormik({
         initialValues: {
             email: '',
@@ -29,22 +31,23 @@ export default function ForgotPassword({ onclose, visible, openOtpForm }) {
             });
 
             authPromise.then(res => {
-              generateOTP(values.email)
-                   .then(res => {  
-                    onclose();
-                    openOtpForm();
-                        // console.log(res)     
-                // onclose();
-                // navigate('/')
-                        
-                                           
+                setEmail(values.email);
+                generateOTP(values.email)
+                    .then(res => {
+                        onclose();
+                        openOtpForm();
+                        console.log(res)
+                        // onclose();
+                        // navigate('/')
+
+
                     })
                     .catch(error => {
                         console.log(error)
                     });
-               
+
             })
-            .catch(() => navigate('/'));
+                .catch(() => navigate('/'));
         }
     })
 
