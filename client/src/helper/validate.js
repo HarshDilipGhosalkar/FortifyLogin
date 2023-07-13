@@ -1,5 +1,16 @@
 import toast from 'react-hot-toast'
 
+/** validate reset password */
+export async function resetPasswordValidation(values){
+    const errors = passwordVerify({}, values);
+
+    if(values.password !== values.confirm){
+        errors.exist = toast.error("Password not match...!");
+    }
+
+    return errors;
+}
+
 /** validate register form */
 export async function registerValidation(values){
     const errors = usernameVerify({}, values);
