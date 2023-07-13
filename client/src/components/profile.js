@@ -64,8 +64,8 @@ export default function Profile() {
         <div className={`${styles.glass} ${extend.glass}`} style={{ width: "45%", paddingTop: '3em'}}>
 
           <div className="title flex flex-col items-center">
-            <h4 className='text-5xl font-bold'>Profile</h4>
-            <span className='py-4 text-xl w-2/3 text-center text-gray-500'>
+            <h4 className='text-5xl text-[#376549] font-bold'>Profile</h4>
+            <span className='py-4 text-xl w-2/3 text-center text-[#AAD468]'>
                 You can update the details.
             </span>
           </div>
@@ -75,12 +75,11 @@ export default function Profile() {
                   <label htmlFor="profile">
                   </label>
                   
-                  <input onChange={onUpload} type="file" id='profile' name='profile' />
               </div>
 
               <div className="textbox flex flex-col items-center gap-6">
                 <div className="name flex w-3/4 gap-10">
-                  <input {...formik.getFieldProps('username')} className={`${styles.textbox} ${extend.textbox}`} type="text" placeholder='FirstName' />
+                  <input {...formik.getFieldProps('username')} className={`${styles.textbox} ${extend.textbox}`}  type="text" placeholder='FirstName' />
                 </div>
 
                 <div className="name flex w-3/4 gap-10">
@@ -90,13 +89,13 @@ export default function Profile() {
 
                
                   <input {...formik.getFieldProps('address')} className={`${styles.textbox} ${extend.textbox}`} type="text" placeholder='Address' />
-                  <button className={styles.btn} type='submit'>Update</button>
+                  <button className="text-[18px] my-[17px] rounded-[12px] w-3/4  bg-[#376549] text-[white] py-[12px] border-2 border-[#AAD468] hover:border-teal-500" type='submit'>Update</button>
                
                   
               </div>
 
               <div className="text-center py-4">
-                <span className='text-gray-500'>come back later? <button onClick={userLogout} className='text-red-500' to="/">Logout</button></span>
+                <span className='text-[#376549]'>come back later? <button onClick={userLogout} className='text-red-500' to="/">Logout</button></span>
               </div>
 
           </form>

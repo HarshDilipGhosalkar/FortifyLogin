@@ -39,7 +39,7 @@ export default function Reset() {
 
     if (status && status !== 201) return <Navigate to={'/'} replace={true}></Navigate>
     if (isLoading) return <h1 className='text-2xl font-bold'>isLoading</h1>;
-    if (serverError) return <h1 className='text-xl text-red-500'>{serverError.message}</h1>
+    if (serverError) return <Navigate to={'/'} replace={true}></Navigate>
     
 
     return (

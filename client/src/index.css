@@ -9,7 +9,7 @@
 }
 
 body{
-    background: #dcdce6;
+    background-image: -webkit-linear-gradient(65deg, #cef5bd 50%, #ffffff 50%);
     /* background-image: url('./assets/Background.png'); */
     padding: 0;
     margin: 0;
